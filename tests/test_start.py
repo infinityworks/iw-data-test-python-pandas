@@ -1,21 +1,22 @@
 from datetime import datetime
-
-import pytest
-from pyspark import Row
+import pandas
 
 from solution.solution_start import get_latest_transaction_date
 
 
-@pytest.mark.usefixtures("spark")
-def test_get_latest_transaction_date_returns_most_recent_date(spark):
-    spark.createDataFrame([
-        Row(date_of_purchase=datetime(2018, 12, 1, 4, 15, 0)),
-        Row(date_of_purchase=datetime(2019, 3, 1, 14, 10, 0)),
-        Row(date_of_purchase=datetime(2019, 2, 1, 14, 9, 59)),
-        Row(date_of_purchase=datetime(2019, 1, 2, 19, 14, 20))
-    ]).createOrReplaceTempView("raw_transactions")
+class TestStart(object):
 
-    expected = datetime(2019, 3, 1, 14, 10, 0)
-    actual = get_latest_transaction_date(spark)
+    def test_get_latest_transaction_date_returns_most_recent_date(self):
+        transactions_df = pandas.concat(
+            [
+                pandas.read_json(
+                    "{\"customer_id\": \"C6\", \"basket\": [{\"product_id\": \"P53\", \"price\": 476}, {\"product_id\": \"P42\", \"price\": 1937}, {\"product_id\": \"P43\", \"price\": 1019}], \"date_of_purchase\": \"2018-12-03 17:52:00\"}"),
+                pandas.read_json(
+                    "{\"customer_id\": \"C125\", \"basket\": [{\"product_id\": \"P28\", \"price\": 1752}], \"date_of_purchase\": \"2019-01-27 08:23:00\"}"),
+                pandas.read_json(
+                    "{\"customer_id\": \"C76\", \"basket\": [{\"product_id\": \"P39\", \"price\": 1033}], \"date_of_purchase\": \"2019-02-27 13:55:00\"}")
+            ]
+        )
 
-    assert actual == expected
+        result = get_latest_transaction_date(transactions_df)
+        assert result.date_of_purchase[0] == "2019-02-27 13:55:00"

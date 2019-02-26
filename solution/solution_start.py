@@ -1,24 +1,33 @@
 import argparse
+import glob
+import json
 
-from pyspark.sql import SparkSession
-
-
-def create_spark_views(spark: SparkSession, customers_location: str, products_location: str,
-                       transactions_location: str):
-    spark.read.csv(customers_location, header=True).createOrReplaceTempView("customers")
-    spark.read.csv(products_location, header=True).createOrReplaceTempView("products")
-    spark.read.json(transactions_location).createOrReplaceTempView("raw_transactions")
+import pandas.io.parsers
 
 
-def run_transformations(spark: SparkSession, customers_location: str, products_location: str,
+def read_csv(csv_location: str):
+    return pandas.read_csv(csv_location, header=0)
+
+
+def read_json_folder(json_folder: str):
+    transactions_files = glob.glob("../input_data/starter/{}/*/*.json", json_folder)
+
+    return pandas.concat(pandas.read_json(tf, lines=True) for tf in transactions_files)
+
+
+def run_transformations(customers_location: str, products_location: str,
                         transactions_location: str, output_location: str):
-    create_spark_views(spark, customers_location, products_location, transactions_location)
+    customers_df = read_csv(customers_location)
+    products_df = read_csv(products_location)
+    transactions_df = read_json_folder(transactions_location)
+
+    return get_latest_transaction_date(transactions_df)
 
 
-def get_latest_transaction_date(spark: SparkSession):
-    result = spark.sql("""SELECT MAX(date_of_purchase) AS date_of_purchase FROM raw_transactions""").collect()[0]
-    max_date = result.date_of_purchase
-    return max_date
+def get_latest_transaction_date(transactions):
+    latest_purchase = transactions.date_of_purchase.max()
+    latest_transaction = transactions[transactions.date_of_purchase == latest_purchase]
+    return latest_transaction
 
 
 def to_canonical_date_str(date_to_transform):
@@ -26,13 +35,6 @@ def to_canonical_date_str(date_to_transform):
 
 
 if __name__ == "__main__":
-    spark_session = (
-            SparkSession.builder
-                        .master("local[2]")
-                        .appName("IWDataTest")
-                        .config("spark.executorEnv.PYTHONHASHSEED", "0")
-                        .getOrCreate()
-    )
 
     parser = argparse.ArgumentParser(description='IWDataTest')
     parser.add_argument('--customers_location', required=False, default="../input_data/starter/customers.csv")
@@ -41,5 +43,5 @@ if __name__ == "__main__":
     parser.add_argument('--output_location', required=False, default="../output_data/outputs/")
     args = vars(parser.parse_args())
 
-    run_transformations(spark_session, args['customers_location'], args['products_location'],
+    run_transformations(args['customers_location'], args['products_location'],
                         args['transactions_location'], args['output_location'])
