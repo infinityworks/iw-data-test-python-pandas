@@ -10,7 +10,7 @@ def read_csv(csv_location: str):
 
 
 def read_json_folder(json_folder: str):
-    transactions_files = glob.glob("../input_data/starter/{}/*/*.json", json_folder)
+    transactions_files = glob.glob("{}*/*.json".format(json_folder))
 
     return pandas.concat(pandas.read_json(tf, lines=True) for tf in transactions_files)
 
