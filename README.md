@@ -35,14 +35,9 @@
 > pip3 --version
 > ```
 > 
-> Install virtualenv:
+> Create a virtual environment in the root of the cloned project:
 > ```bash
-> pip3 install virtualenv
-> ```
-> 
-> Create the virtual environment in the root of the cloned project:
-> ```bash
-> virtualenv -p python3 .venv
+> python3 -m venv .venv 
 > ```
 
 #### Activating the newly created virtual environment
