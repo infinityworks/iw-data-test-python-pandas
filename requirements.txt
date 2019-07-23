@@ -1,4 +1,4 @@
-pandas==0.25
+pandas>=0.25
 numpy
 python-dateutil
 pytest
