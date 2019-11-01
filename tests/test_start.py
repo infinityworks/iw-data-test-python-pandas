@@ -1,4 +1,3 @@
-from datetime import datetime
 import pandas
 
 from solution.solution_start import get_latest_transaction_date

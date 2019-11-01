@@ -1,6 +1,5 @@
 import argparse
 import glob
-import json
 
 import pandas.io.parsers
 
@@ -37,10 +36,10 @@ def to_canonical_date_str(date_to_transform):
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description='IWDataTest')
-    parser.add_argument('--customers_location', required=False, default="../input_data/starter/customers.csv")
-    parser.add_argument('--products_location', required=False, default="../input_data/starter/products.csv")
-    parser.add_argument('--transactions_location', required=False, default="../input_data/starter/transactions/")
-    parser.add_argument('--output_location', required=False, default="../output_data/outputs/")
+    parser.add_argument('--customers_location', required=False, default="./input_data/starter/customers.csv")
+    parser.add_argument('--products_location', required=False, default="./input_data/starter/products.csv")
+    parser.add_argument('--transactions_location', required=False, default="./input_data/starter/transactions/")
+    parser.add_argument('--output_location', required=False, default="./output_data/outputs/")
     args = vars(parser.parse_args())
 
     run_transformations(args['customers_location'], args['products_location'],
